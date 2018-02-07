@@ -9,6 +9,11 @@ function Animator(context) {
 	this.radius = 0;	//Set this to negative when shrinking, so you always add 1
 }
 
+Animator.prototype.wrap = function(args) {
+	let that = this;
+	return func.apply(that, ...args);
+};
+
 Animator.prototype.drawCircle = function() {
 	this.ctx.fillStyle = "BlanchedAlmond";
 	this.ctx.beginPath();
@@ -22,7 +27,7 @@ Animator.prototype.drawCircle = function() {
 		this.radius *= -1;
 	}
 	window.requestAnimationFrame(this.drawCircle);
-}
+};
 
 function init() {
 	let cvs = document.getElementById("boi");
