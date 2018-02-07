@@ -1,13 +1,11 @@
 "use strict";
 
-let cvs;
-let anim;
-
 function makePositive(num) {
 	return (num < 0) ? -num : num;
 }
 
-function Animator(context) {
+function Animator(canvas, context) {
+	this.cvs = canvas;
 	this.ctx = context;
 	this.radius = 0;	//Set this to negative when shrinking, so you always add 1
 	this.requestId = 0;
@@ -28,54 +26,42 @@ Animator.prototype.init = function() {
 	}
 };
 
-function um() {
-	let requestId = 0;
+Animator.prototype.animate = function() {
+	let radius = 0;	//Set this to negative when shrinking, so you always add 1
+	let that = this;
 	
-	let temp = function() {
-		this.ctx.fillStyle = "BlanchedAlmond";
-		this.ctx.clearRect(0, 0, cvs.width, cvs.height);
-		this.ctx.beginPath();
+	(function drawCircle() {
+		that.stopAnim();
+		that.ctx.fillStyle = "BlanchedAlmond";
+		that.ctx.clearRect(0, 0, that.cvs.width, that.cvs.height);
+		that.ctx.beginPath();
 		
-		this.ctx.arc(cvs.width/2, cvs.height/2,
-			makePositive(this.radius++), 0, 2*Math.PI);
+		that.ctx.arc(that.cvs.width/2, that.cvs.height/2,
+			makePositive(radius++), 0, 2*Math.PI);
 		
-		this.ctx.fill();
-		this.ctx.stroke();
+		that.ctx.fill();
+		that.ctx.stroke();
 		
-		if (this.radius > cvs.width/2) {
-			this.radius *= -1;
+		if (radius > that.cvs.width/2) {
+			radius *= -1;
 		}
-		requestId = window.requestAnimationFrame(this.drawCircle);
-		console.log(requestId);
-	};
-	if (Animator.prototype.drawCircle === undefined) {
-		Animator.prototype.drawCircle = temp;
-		anim.wrap(anim.drawCircle);
-	}
-	anim.drawCircle();
-
-	let t  = function() {
-		window.cancelAnimationFrame(requestId);
-	};
-	if (Animator.prototype.stopAnim === undefined) {
-		Animator.prototype.stopAnim = t;
-	}
-	console.log("um");
+		that.requestId = window.requestAnimationFrame(drawCircle);
+	}());
 }
 
+Animator.prototype.stopAnim = function() {
+	window.cancelAnimationFrame(this.requestId);
+};
+
 function init() {
-	cvs = document.getElementById("boi");
-	anim = new Animator(cvs.getContext("2d"));
+	let cvs = document.getElementById("boi");
+	let anim = new Animator(cvs, cvs.getContext("2d"));
 	anim.init();
-	//um();
-	
-	//window.requestAnimationFrame(anim.drawCircle);
 	
 	let start = document.getElementById("start");
 	let stop = document.getElementById("stop");
 	
-	//start.addEventListener("click", anim.drawCircle);
-	start.addEventListener("click", um);
+	start.addEventListener("click", anim.animate);
 	stop.addEventListener("click", anim.stopAnim);
 }
 
