@@ -4,9 +4,14 @@ function makePositive(num) {
 	return (num < 0) ? -num : num;
 }
 
-function Animator(canvas, context) {
+function randMax(max) {
+	return Math.random()*max;
+}
+
+function Animator(canvas, context, speed) {
 	this.cvs = canvas;
 	this.ctx = context;
+	this.spd = speed;
 	this.requestId = 0;
 }
 
@@ -56,14 +61,14 @@ Animator.prototype.bouncingCircle = function() {
 	let that = this;
 	
 	let radius = 50;
-	let posX = 150;
-	let posY = 60;
-	let vel = 10;
-	let angle = Math.PI / 4;
+	let posX = randMax(this.cvs.width-radius);
+	let posY = randMax(this.cvs.width-radius);
+	//let vel = this.spd.value;
+	let angle = randMax(2*Math.PI);
 	
 	(function temp() {
 		that.clear();
-		
+		let vel = that.spd.value;
 		/*
 		angle pairings:
 		top: 3PI/4 5PI/4, PI/4 7PI/4
@@ -72,34 +77,35 @@ Animator.prototype.bouncingCircle = function() {
 		left: 5PI/4 7PI/4, 3PI/4 PI/4
 		*/
 		
-		if (posX > that.cvs.width-radius) {
+		//console.log(`${posX}, ${posY}`);
+		if (	(posX >= that.cvs.width-radius) ||
+			(posX <= 0+radius)) {
 			if (angle > Math.PI) {
 				angle = 3*Math.PI - angle;
 			}
 			else {
 				angle = Math.PI - angle;
 			}
+			//console.log("changing right");
 		}
-		else if (posX < 0+radius) { 
-			if (angle > Math.PI) {
-				angle = 3*Math.PI - angle;
-			}
-			else {
-				angle = Math.PI - angle;
-			}
-		}
-		else if (posY > that.cvs.height-radius) { 
+		else if (	(posY >= that.cvs.height-radius) ||
+				(posY <= 0+radius)) { 
 			angle = 2*Math.PI - angle;
+			//console.log("changing bottom");
 		}
-		else if (posY < 0+radius) { 
-			angle = 2*Math.PI - angle;
-		}
-		
 		
 		posY += vel * Math.sin(angle);
 		posX += vel * Math.cos(angle);
 		
-		that.ctx.arc(posY, posX, radius, 0, 2*Math.PI);
+		if (posX < 0+radius) posX = radius;
+		else if (posX > that.cvs.width-radius) posX = that.cvs.width-radius;
+		else if (posY < 0+radius) posY = radius;
+		else if (posY > that.cvs.height-radius) {
+			posY = that.cvs.height-radius;
+		}
+		
+		
+		that.ctx.arc(posX, posY, radius, 0, 2*Math.PI);
 		that.ctx.fill();
 		that.ctx.stroke();
 		
@@ -113,7 +119,10 @@ Animator.prototype.stopAnim = function() {
 
 (function() {
 	let cvs = document.getElementById("boi");
-	let anim = new Animator(cvs, cvs.getContext("2d"));
+	let speed = document.getElementById("speed");
+	console.log(speed);
+	
+	let anim = new Animator(cvs, cvs.getContext("2d"), speed);
 	anim.init();
 	
 	let start = document.getElementById("pulse");
