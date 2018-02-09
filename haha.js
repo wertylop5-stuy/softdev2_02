@@ -63,11 +63,22 @@ Animator.prototype.bouncingCircle = function() {
 	let radius = 50;
 	let posX = randMax(this.cvs.width-radius);
 	let posY = randMax(this.cvs.width-radius);
-	//let vel = this.spd.value;
 	let angle = randMax(2*Math.PI);
 	
+	this.clear();
+	
 	(function temp() {
-		that.clear();
+		that.stopAnim();
+		
+		//for the trail effect
+		that.ctx.beginPath();
+		that.ctx.fillStyle = `rgba(255, 255, 255, .15)`;
+		that.ctx.rect(0, 0, that.cvs.width, that.cvs.height);
+		that.ctx.fill();
+		
+		that.ctx.beginPath();
+		that.ctx.fillStyle = "BlanchedAlmond";
+		
 		let vel = that.spd.value;
 		/*
 		angle pairings:
@@ -77,7 +88,6 @@ Animator.prototype.bouncingCircle = function() {
 		left: 5PI/4 7PI/4, 3PI/4 PI/4
 		*/
 		
-		//console.log(`${posX}, ${posY}`);
 		if (	(posX >= that.cvs.width-radius) ||
 			(posX <= 0+radius)) {
 			if (angle > Math.PI) {
@@ -86,12 +96,10 @@ Animator.prototype.bouncingCircle = function() {
 			else {
 				angle = Math.PI - angle;
 			}
-			//console.log("changing right");
 		}
 		else if (	(posY >= that.cvs.height-radius) ||
 				(posY <= 0+radius)) { 
 			angle = 2*Math.PI - angle;
-			//console.log("changing bottom");
 		}
 		
 		posY += vel * Math.sin(angle);
@@ -103,7 +111,6 @@ Animator.prototype.bouncingCircle = function() {
 		else if (posY > that.cvs.height-radius) {
 			posY = that.cvs.height-radius;
 		}
-		
 		
 		that.ctx.arc(posX, posY, radius, 0, 2*Math.PI);
 		that.ctx.fill();
@@ -120,7 +127,6 @@ Animator.prototype.stopAnim = function() {
 (function() {
 	let cvs = document.getElementById("boi");
 	let speed = document.getElementById("speed");
-	console.log(speed);
 	
 	let anim = new Animator(cvs, cvs.getContext("2d"), speed);
 	anim.init();
